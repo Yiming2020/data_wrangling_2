@@ -124,3 +124,20 @@ brdss_2010 =
 
 ```
 
+## Some data  aren't so nice
+
+Let's look at Pokemon
+
+```{r}
+pokemon_data = 
+  GET("https://pokeapi.co/api/v2/pokemon/1") %>% 
+  content()
+
+pokemon_data$name
+pokemon_data$height
+pokemon_data$abilities
+```
+
+## Closing thoughts,
+### 太多次request data from web for each kint，so access data 和analysis data最好放在两个不同的Rmarkdown file
+# Be reasonable
