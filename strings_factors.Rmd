@@ -113,3 +113,46 @@ vec_sex
 as.numeric(vec_sex)
 ```
 
+# NASDUH
+
+```{r}
+nsduh_url = "http://samhda.s3-us-gov-west-1.amazonaws.com/s3fs-public/field-uploads/2k15StateFiles/NSDUHsaeShortTermCHG2015.htm"
+
+table_marj = 
+  read_html(nsduh_url) %>% 
+  html_nodes(css = "table") %>% 
+  first() %>%
+  html_table() %>%
+  slice(-1) %>%
+  as_tibble()
+```
+
+
+```{r}
+data_marj = 
+  table_marj %>%
+  select(-contains("P Value")) %>%  # remove any column names contain " P value"
+  pivot_longer(
+    -State,
+    names_to = "age_year", 
+    values_to = "percent") %>%
+  separate(age_year, into = c("age", "year"), sep = "\\(") %>%
+  mutate(
+    year = str_replace(year, "\\)", ""),  # 去掉某一列中每个cell含有的某个特定character
+    percent = str_replace(percent, "[a-c]$", ""),
+    percent = as.numeric(percent)) %>%
+  filter(!(State %in% c("Total U.S.", "Northeast", "Midwest", "South", "West")))
+# 上面的filter是代表I don't want to the State variable to be one of either "Total U.S.", "Northeast", "Midwest" or "South", "West"
+#%in% operator in R, is used to identify if an element belongs to a vector or Dataframe
+```
+
+
+```{r}
+data_marj %>%
+  filter(age == "12-17") %>% 
+  mutate(State = fct_reorder(State, percent)) %>% 
+  ggplot(aes(x = State, y = percent, color = year)) + 
+    geom_point() + 
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
