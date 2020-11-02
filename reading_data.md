@@ -91,3 +91,48 @@ nyc_water =
   jsonlite::fromJSON() %>% 
   as_tibble
 ```
+
+## BRFSS
+
+Same process, different data
+
+``` r
+# page through data:https://dev.socrata.com/docs/paging.html
+brdss_2010 = 
+  GET("https://chronicdata.cdc.gov/resource/acme-vg9e.csv") %>% 
+  content("parsed")   # 发现只出现1000rows，但实际13k rows。 因为API paging through data
+```
+
+    ## Parsed with column specification:
+    ## cols(
+    ##   .default = col_character(),
+    ##   year = col_double(),
+    ##   sample_size = col_double(),
+    ##   data_value = col_double(),
+    ##   confidence_limit_low = col_double(),
+    ##   confidence_limit_high = col_double(),
+    ##   display_order = col_double(),
+    ##   locationid = col_logical()
+    ## )
+
+    ## See spec(...) for full column specifications.
+
+``` r
+brdss_2010 = 
+  GET("https://chronicdata.cdc.gov/resource/acme-vg9e.csv",
+      query = list("$limit" = 5000)) %>%   ###instead of request 1000 rows, but request 5000 rows
+  content("parsed") 
+```
+
+    ## Parsed with column specification:
+    ## cols(
+    ##   .default = col_character(),
+    ##   year = col_double(),
+    ##   sample_size = col_double(),
+    ##   data_value = col_double(),
+    ##   confidence_limit_low = col_double(),
+    ##   confidence_limit_high = col_double(),
+    ##   display_order = col_double(),
+    ##   locationid = col_logical()
+    ## )
+    ## See spec(...) for full column specifications.
