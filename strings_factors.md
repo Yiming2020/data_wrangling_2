@@ -163,13 +163,28 @@ data_marj =
 #%in% operator in R, is used to identify if an element belongs to a vector or Dataframe
 ```
 
+## NSDUH – FACTORS
+
 ``` r
+#大概是只改一两个的顺序的时候用relevel，想要按照某种顺序排列全部的时候，用reorder
+
 data_marj %>%
   filter(age == "12-17") %>% 
-  mutate(State = fct_reorder(State, percent)) %>% 
+  mutate(State = fct_relevel(State, "Texas")) %>% # 不想在之后作图的时候state作为a-xis以alphabetical order排序，我想state以Texas 作为default state（作图的时候排在前面），注意这里是relevel
   ggplot(aes(x = State, y = percent, color = year)) + 
     geom_point() + 
     theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ```
 
 <img src="strings_factors_files/figure-gfm/unnamed-chunk-11-1.png" width="90%" />
+
+``` r
+data_marj %>%
+  filter(age == "12-17") %>% 
+  mutate(State = fct_reorder(State, percent)) %>% # 不想在之后作图的时候state作为a-xis以alphabetical order排序，我想state以percent从小到大排列作图，注意这里是reorder
+  ggplot(aes(x = State, y = percent, color = year)) + 
+    geom_point() + 
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
+<img src="strings_factors_files/figure-gfm/unnamed-chunk-11-2.png" width="90%" />
