@@ -96,3 +96,20 @@ str_detect(string_vec, "\\[") #代表不想要`[`作为special character（=anyt
 
 
 ## Factors
+
+```{r}
+vec_sex = factor(c("male", "male", "female", "female"))
+
+vec_sex
+
+as.numeric(vec_sex)
+```
+
+what happens if i relevel
+```{r}
+vec_sex = fct_relevel(vec_sex, "male")  # make male as the first level
+vec_sex
+
+as.numeric(vec_sex)
+```
+
