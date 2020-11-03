@@ -1,0 +1,130 @@
+---
+title: "Data wrangling 2, live session"
+output: github_document
+---
+
+```{r setup, include = FALSE}
+library(tidyverse)
+library(httr)
+library(rvest)
+
+knitr::opts_chunk$set(
+  fig.width = 6,
+  fig.asp = .6,
+  out.width = "90%"
+)
+
+theme_set(theme_minimal() + theme(legend.position = "bottom"))
+
+options(
+  ggplot2.continuous.colour = "viridis",
+  ggplot2.continuous.fill = "viridis"
+)
+
+scale_colour_discrete = scale_colour_viridis_d
+scale_fill_discrete = scale_fill_viridis_d
+```
+
+## Restaurant inspection
+
+```{r}
+api_url = "https://data.cityofnewyork.us/resource/43nn-pn8j.csv"
+
+rest_inspections = 
+  GET(api_url,  query = list("$limit" = 5000)) %>% 
+  content("parsed")
+```
+
+```{r}
+rest_inspections %>% 
+  count(boro, grade) %>% 
+  pivot_wider(names_from = grade, values_from = n)
+```
+
+```{r}
+rest_inspections = 
+  rest_inspections %>% 
+  filter(grade %in% c("A", "B", "C"), boro != "0")
+```
+
+Let's look at the pizza places
+
+```{r}
+rest_inspections %>% 
+  mutate(dba = str_to_upper(dba)) %>% 
+  filter(str_detect(dba, "PIZZA")) 
+```
+
+```{r}
+rest_inspections %>% 
+  mutate(dba = str_to_upper(dba)) %>% 
+  filter(str_detect(dba, "PIZZA")) %>% 
+  count(boro, grade) %>% 
+  pivot_wider(names_from = grade, values_from = n)
+  
+```
+
+```{r}
+rest_inspections %>% 
+  mutate(dba = str_to_upper(dba)) %>% 
+  filter(str_detect(dba, "PIZZA")) %>% 
+  mutate(boro = fct_relevel(boro, "Manhattan")) %>% 
+  ggplot(aes(x = boro)) + 
+  geom_bar() +
+  facet_wrap(. ~ grade)
+
+rest_inspections %>% 
+  mutate(dba = str_to_upper(dba)) %>% 
+  filter(str_detect(dba, "PIZZA")) %>% 
+  mutate(boro = fct_infreq(boro)) %>% 
+  ggplot(aes(x = boro)) + 
+  geom_bar() +
+  facet_wrap(. ~ grade)
+
+rest_inspections %>% 
+  mutate(dba = str_to_upper(dba)) %>% 
+  filter(str_detect(dba, "PIZZA")) %>% 
+  mutate(
+    boro = fct_infreq(boro),
+    boro = str_replace(boro, "Brooklyn", "HipsterVille")) %>% # 用hipersterville替换Brooklyn的名字, 但这个方法破坏了factor的属性
+  ggplot(aes(x = boro)) + 
+  geom_bar() +
+  facet_wrap(. ~ grade)
+
+rest_inspections %>% 
+  mutate(dba = str_to_upper(dba)) %>% 
+  filter(str_detect(dba, "PIZZA")) %>% 
+  mutate(
+    boro = fct_infreq(boro),
+    boro = fct_recode
+    (boro, "HipsterHQ" = "Brooklyn")) %>% # 用hipersterville替换Brooklyn的名字,这个办法保留了factor的属性
+  ggplot(aes(x = boro)) + 
+  geom_bar() +
+  facet_wrap(. ~ grade)
+```
+
+
+## Napoleon dynamite
+
+GET SOME Napoleon dynamite reviews
+```{r}
+nap_dyn_url = "https://www.amazon.com/Napoleon-Dynamite-Jon-Heder/product-reviews/B00005JNBQ"
+
+napoleon_html = read_html(nap_dyn_url)
+
+review_titles = 
+  napoleon_html %>% 
+  html_nodes(css = ".a-text-bold span") %>% 
+  html_text()
+
+review_text= 
+  napoleon_html %>% 
+  html_nodes(css = ".review-text-content span") %>% 
+  html_text()
+
+tibble(
+  tittles = review_titles,
+  text = review_text
+)
+```
+
